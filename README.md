@@ -17,6 +17,22 @@ Download all available artifacts or specified artifacts from bintray/jcenter.
 ./download_artifacts.sh jcenter <group id> <artifact id> [version]
 ```
 
+e.g. `./download_artifacts.sh jcenter io.github.jmatsu`
+
+```
+maven/io
+   |-- github
+   |    |-- jmatsu
+   |    |    |-- example1
+   |    |    |    |-- 1.1.1
+   |    |    |    |    |-- example1-1.1.1-javadoc.jar
+   |    |    |    |    |-- example1-1.1.1-sources.jar
+   |    |    |    |    |-- example1-1.1.1.jar
+   |    |    |    |    |-- example1-1.1.1.pom
+   |    |    |    |-- maven-metadata.xml
+   |    |    |-- example12
+```
+
 ### complete_pom.rb
 
 Substitute several information to a pom.xml to satisfy Maven Central's requirements.
@@ -36,6 +52,27 @@ echo "$passphrase" | ./sign_and_bundle.sh <key id> <group id> [artifact id] [ver
 # or 
 export SIGNING_PASSPHRASE=...
 ./sign_and_bundle.sh <key id> <group id> [artifact id] [version]
+```
+
+e.g. `./sign_and_bundle.sh ABCDEF io.github.jmatsu exmaple1 1.1.1`
+
+```
+maven/io
+   |-- github
+   |    |-- jmatsu
+   |    |    |-- example1
+   |    |    |    |-- 1.1.1
+   |    |    |    |    |-- example1-1.1.1-bundle.jar
+   |    |    |    |    |-- example1-1.1.1-javadoc.jar
+   |    |    |    |    |-- example1-1.1.1-javadoc.jar.asc
+   |    |    |    |    |-- example1-1.1.1-sources.jar
+   |    |    |    |    |-- example1-1.1.1-sources.jar.asc
+   |    |    |    |    |-- example1-1.1.1.jar
+   |    |    |    |    |-- example1-1.1.1.jar.asc
+   |    |    |    |    |-- example1-1.1.1.pom
+   |    |    |    |    |-- example1-1.1.1.pom.asc
+   |    |    |    |-- maven-metadata.xml
+   |    |    |-- example12
 ```
 
 ### upload_to_sonatype.sh
