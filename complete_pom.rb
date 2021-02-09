@@ -61,6 +61,10 @@ def complete_pom(pom_file_path:, properties:)
     developers_properties.each_with_index do |developer_properties, index|
       add_node_if_absent(node: developers_node, name: 'developer') do |developer_node|
         
+        add_node_if_absent(node: developer_node, name: 'id') do |id_node|
+          id_node.text = developer_properties["id"] or raise "developers[#{index}].id is required"
+        end
+
         add_node_if_absent(node: developer_node, name: 'name') do |name_node|
           name_node.text = developer_properties["name"] or raise "developers[#{index}].name is required"
         end
