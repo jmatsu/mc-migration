@@ -78,6 +78,7 @@ main() {
         echo "$bundle_jar does not exist so skipped"
       else
         curl \
+          -f# \
           -u "$nexus_username:$nexus_password" \
           -X POST \
           -F "file=@$PWD/$bundle_jar" \
