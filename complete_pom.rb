@@ -46,9 +46,11 @@ def complete_pom(pom_file_path:, properties:)
         add_node_if_absent(node: license_node, name: 'url') do |url_node|
           url_node.text = license_properties["url"] or raise "licenses[#{index}].url is required"
         end
-    
-        add_node_if_absent(node: license_node, name: 'distribution') do |distribution_node|
-          distribution_node.text = license_properties["distribution"] or raise "licenses[#{index}].distribution is required"
+        
+        unless (distribution = license_properties["distribution"]).nil?
+          add_node_if_absent(node: license_node, name: 'distribution') do |distribution_node|
+            distribution_node.text = distribution
+          end
         end
       end
     end
@@ -60,21 +62,56 @@ def complete_pom(pom_file_path:, properties:)
   
     developers_properties.each_with_index do |developer_properties, index|
       add_node_if_absent(node: developers_node, name: 'developer') do |developer_node|
-        
-        add_node_if_absent(node: developer_node, name: 'id') do |id_node|
-          id_node.text = developer_properties["id"] or raise "developers[#{index}].id is required"
-        end
 
         add_node_if_absent(node: developer_node, name: 'name') do |name_node|
           name_node.text = developer_properties["name"] or raise "developers[#{index}].name is required"
+        end
+        
+        unless (developer_id = developer_properties["id"]).nil?
+          add_node_if_absent(node: developer_node, name: 'id') do |id_node|
+            id_node.text = developer_id
+          end
+        end
+        
+        unless (developer_email = developer_properties["email"]).nil?
+          add_node_if_absent(node: developer_node, name: 'email') do |email_node|
+            email_node.text = developer_email
+          end
+        end
+        
+        unless (developer_organization = developer_properties["organization"]).nil?
+          add_node_if_absent(node: developer_node, name: 'organization') do |organization_node|
+            organization_node.text = developer_organization
+          end
+        end
+        
+        unless (developer_organization_url = developer_properties["organizationUrl"]).nil?
+          add_node_if_absent(node: developer_node, name: 'organizationUrl') do |organization_url_node|
+            organization_url_node.text = developer_organization_url
+          end
         end
       end
     end
   end
   
   add_node_if_absent(node: project_node, name: 'scm') do |scm_node|
+    scm_properties = properties['scm'] or raise "scm is required"
+    raise "scm must not be empty" if scm_properties.empty?
+
     add_node_if_absent(node: scm_node, name: 'url') do |name_node|
-      name_node.text = properties.dig("scm", "url") or raise "scm.url is required"
+      name_node.text = scm_properties["url"] or raise "scm.url is required"
+    end
+        
+    unless (scm_connection = scm_properties["connection"]).nil?
+      add_node_if_absent(node: scm_node, name: 'connection') do |scm_connection_node|
+        scm_connection_node.text = scm_connection
+      end
+    end
+        
+    unless (dev_connection = scm_properties["developerConnection"]).nil?
+      add_node_if_absent(node: scm_node, name: 'developerConnection') do |dev_connection_node|
+        dev_connection_node.text = dev_connection
+      end
     end
   end
   
