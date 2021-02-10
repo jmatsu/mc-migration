@@ -6,6 +6,7 @@
 - complete_pom.rb
 - sign_and_bundle.sh
 - upload_to_sonatype.sh
+- sync_to_maven_central.sh
 
 ## Usage
 
@@ -83,6 +84,18 @@ Upload bundled jar files to sonatype staging.
 export NEXUS_USERNAME=...
 export NEXUS_PASSWORD=...
 ./upload_to_sonatype.sh <group id> [artifact id] [version]
+```
+
+### sync_to_maven_central.sh
+
+Release staging repositories i.e. Sync to Maven Central.
+
+> Dropping repositories is not supported.
+
+```bash
+export NEXUS_USERNAME=...
+export NEXUS_PASSWORD=...
+./sync_to_maven_central.sh <group id> [artifact id] [version]
 ```
 
 ## Tips
