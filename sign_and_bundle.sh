@@ -40,6 +40,25 @@ list_all_signees() {
   find . -type f | grep -v ".*\.asc"
 }
 
+create_maven_metadata() {
+  local -r group_id="${1:?group id is required}" artifact_id="${2:?artifact id is required}" version="${3:?version is required}"
+cat<<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>${group_id}</groupId>
+  <artifactId>${artifact_id}</artifactId>
+  <versioning>
+    <latest>${version}</latest>
+    <release>${version}</release>
+    <versions>
+      <version>${version}</version>
+    </versions>
+    <lastUpdated>$(date +%Y%m%d%H%M%S)</lastUpdated>
+  </versioning>
+</metadata>
+EOF
+}
+
 main() {
   local -r working_directory="${WORKING_DIRECTORY:-maven}"
 
@@ -99,6 +118,8 @@ main() {
       if [[ -f "$artifact_id-$version-bundle.jar" ]]; then
         cp "$artifact_id-$version-bundle.jar" "$artifact_id-$version-bundle.jar.backup"
       fi
+      
+      create_maven_metadata "$group_id" "$artifact_id" "$version" > maven-metadata.xml
 
       jar -cvf "$artifact_id-$version-bundle.jar" $(find . -type f -maxdepth 1 | grep -v ".*.backup" | xargs)
 
