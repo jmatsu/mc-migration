@@ -15,6 +15,10 @@ cleanup() {
   fi
 }
 
+log() {
+  echo "$*" 1>&2
+}
+
 if [[ -z "${NEXUS_USERNAME:-}" ]]; then
   echo "Enter the nexus username." 1>&2
   read -s -t 5 -r nexus_username
@@ -53,8 +57,10 @@ main() {
       continue
     fi
 
-    pushd "$artifact_id_directory"
+    pushd "$artifact_id_directory" >/dev/null 1>&2
     artifact_id="$(basename $PWD)"
+    
+    log "Dive into $artifact_id"
 
     declare -a version_directories=()
 
@@ -69,20 +75,27 @@ main() {
         continue
       fi
 
-      pushd "$version_directory"
+      pushd "$version_directory" >/dev/null 1>&2
       version="$(basename $PWD)"
+    
+      log "Look up $artifact_id/$version"
 
       bundle_jar="$artifact_id-$version-bundle.jar"
       
       if [[ ! -f "$bundle_jar" ]]; then
-        echo "$bundle_jar does not exist so skipped"
+        log "$bundle_jar does not exist so skipped"
+      elif [[ -f "response.json" ]]; then
+        log "response.json already exists so skipped"
       else
         curl \
           -f# \
           -u "$nexus_username:$nexus_password" \
-          -X POST \
           -F "file=@$PWD/$bundle_jar" \
+          -o "response.json" \
           "https://oss.sonatype.org/service/local/staging/bundle_upload"
+        cat "response.json" 1>&2
+        log
+        log "Uploaded $bundle_jar"
       fi
 
       popd >/dev/null 2>&1

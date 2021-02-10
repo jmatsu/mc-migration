@@ -40,25 +40,6 @@ list_all_signees() {
   find . -type f | grep -v ".*\.asc"
 }
 
-create_maven_metadata() {
-  local -r group_id="${1:?group id is required}" artifact_id="${2:?artifact id is required}" version="${3:?version is required}"
-cat<<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<metadata>
-  <groupId>${group_id}</groupId>
-  <artifactId>${artifact_id}</artifactId>
-  <versioning>
-    <latest>${version}</latest>
-    <release>${version}</release>
-    <versions>
-      <version>${version}</version>
-    </versions>
-    <lastUpdated>$(date +%Y%m%d%H%M%S)</lastUpdated>
-  </versioning>
-</metadata>
-EOF
-}
-
 log() {
   echo "$*" 1>&2
 }
@@ -113,19 +94,16 @@ main() {
       if ls -1 | grep ".asc" >/dev/null 2>&1; then
         log "$artifact_id/$version already contains detached signatures so skipped signing, just will do bundling"
       else
-        log "Generate maven-metadata.xml"
-
-        create_maven_metadata "$group_id" "$artifact_id" "$version" > maven-metadata.xml
-
         log "Start sigining $artifact_id/$version"
 
         while read artifact; do
           sign_with_ascii_detached_sig "$artifact"
-        done < <(find . -type f -maxdepth 1 | grep -v ".*.backup")
+          log "Signed $artifact"
+        done < <(find . -type f -maxdepth 1 | grep -v ".*\.backup" | grep -v "^\./\..*")
       fi
 
       if [[ -f "$artifact_id-$version-bundle.jar" ]]; then
-        cp "$artifact_id-$version-bundle.jar" "$artifact_id-$version-bundle.jar.backup"
+        mv "$artifact_id-$version-bundle.jar" "$artifact_id-$version-bundle.jar.backup"
       fi
 
       jar -cvf "$artifact_id-$version-bundle.jar" $(find . -type f -maxdepth 1 | grep -v ".*\.backup" | grep -v "^\./\..*" | xargs)
