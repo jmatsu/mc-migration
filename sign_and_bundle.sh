@@ -64,8 +64,10 @@ main() {
       continue
     fi
 
-    pushd "$artifact_id_directory"
+    pushd "$artifact_id_directory" >/dev/null 2>&1
     artifact_id="$(basename $PWD)"
+    
+    echo "Dive into $artifact_id" 1>&2
 
     declare -a version_directories=()
 
@@ -80,8 +82,10 @@ main() {
         continue
       fi
 
-      pushd "$version_directory"
+      pushd "$version_directory" >/dev/null 2>&1
       version="$(basename $PWD)"
+    
+      echo "Look up $artifact_id/$version" 1>&2
 
       if ls -1 | grep ".asc" >/dev/null 2>&1; then
         echo "$artifact_id/$version already contains detached signatures so skipped signing, just will do bundling" 1>&2
@@ -100,6 +104,8 @@ main() {
 
       popd >/dev/null 2>&1
     done
+    
+    popd >/dev/null 2>&1
   done
 }
 
