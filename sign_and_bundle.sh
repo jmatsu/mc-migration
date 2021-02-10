@@ -59,6 +59,10 @@ cat<<EOF
 EOF
 }
 
+log() {
+  echo "$*" 1>&2
+}
+
 main() {
   local -r working_directory="${WORKING_DIRECTORY:-maven}"
 
@@ -86,7 +90,7 @@ main() {
     pushd "$artifact_id_directory" >/dev/null 2>&1
     artifact_id="$(basename $PWD)"
     
-    echo "Dive into $artifact_id" 1>&2
+    log "Dive into $artifact_id"
 
     declare -a version_directories=()
 
@@ -104,12 +108,17 @@ main() {
       pushd "$version_directory" >/dev/null 2>&1
       version="$(basename $PWD)"
     
-      echo "Look up $artifact_id/$version" 1>&2
+      log "Look up $artifact_id/$version"
 
       if ls -1 | grep ".asc" >/dev/null 2>&1; then
-        echo "$artifact_id/$version already contains detached signatures so skipped signing, just will do bundling" 1>&2
+        log "$artifact_id/$version already contains detached signatures so skipped signing, just will do bundling"
       else
-        echo "Start sigining $artifact_id/$version" 1>&2
+        log "Generate maven-metadata.xml"
+
+        create_maven_metadata "$group_id" "$artifact_id" "$version" > maven-metadata.xml
+
+        log "Start sigining $artifact_id/$version"
+
         while read artifact; do
           sign_with_ascii_detached_sig "$artifact"
         done < <(find . -type f -maxdepth 1 | grep -v ".*.backup")
@@ -118,10 +127,8 @@ main() {
       if [[ -f "$artifact_id-$version-bundle.jar" ]]; then
         cp "$artifact_id-$version-bundle.jar" "$artifact_id-$version-bundle.jar.backup"
       fi
-      
-      create_maven_metadata "$group_id" "$artifact_id" "$version" > maven-metadata.xml
 
-      jar -cvf "$artifact_id-$version-bundle.jar" $(find . -type f -maxdepth 1 | grep -v ".*.backup" | xargs)
+      jar -cvf "$artifact_id-$version-bundle.jar" $(find . -type f -maxdepth 1 | grep -v ".*\.backup" | grep -v "^\./\..*" | xargs)
 
       popd >/dev/null 2>&1
     done
