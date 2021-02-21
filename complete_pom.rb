@@ -138,7 +138,8 @@ dir = File.join(*[
 ])
 
 Dir.chdir(dir) do
-  if ARGV[2].nil?
+  version = ARGV[2]
+  if version.nil?
     pom_file_paths = Dir.glob("**/*.pom").sort
   else
     pom_file_paths = [
